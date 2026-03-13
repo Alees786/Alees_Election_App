@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ballot Control — Election Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628; --royal: #1a3a6b; --gold: #c9a84c; --gold-light: #f0d080;
+    --cream: #fdf8ee; --red: #c0392b; --green: #27ae60; --orange: #e67e22;
+    --shadow: 0 8px 32px rgba(10,22,40,0.2); --radius: 16px;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans',sans-serif; background:var(--navy); color:var(--cream); min-height:100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    position:fixed; inset:0; z-index:9999;
+    background:linear-gradient(135deg,var(--navy),#0d2045);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:2rem;
+  }
+  .login-box {
+    background:linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
+    border:1px solid rgba(201,168,76,0.3); border-radius:20px;
+    padding:2.5rem; max-width:400px; width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  .login-icon { font-size:2.5rem; margin-bottom:1rem; }
+  .login-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold); margin-bottom:0.4rem; }
+  .login-sub { color:rgba(253,248,238,0.5); font-size:0.85rem; margin-bottom:1.8rem; }
+  .input-group { position:relative; margin-bottom:1rem; }
+  .input-group input {
+    width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+    border-radius:10px; padding:0.85rem 1rem; color:var(--cream);
+    font-family:'DM Sans',sans-serif; font-size:0.95rem;
+    outline:none; transition:border-color 0.2s;
+  }
+  .input-group input:focus { border-color:var(--gold); }
+  .login-hint { font-size:0.72rem; color:rgba(253,248,238,0.35); margin-bottom:1.5rem; }
+  .btn { border:none; border-radius:50px; padding:0.8rem 2rem; font-family:'DM Sans',sans-serif; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--navy); box-shadow:0 4px 16px rgba(201,168,76,0.3); }
+  .btn-gold:hover { transform:translateY(-2px); }
+  .login-error { display:none; color:#e88; font-size:0.82rem; margin-bottom:1rem; }
+
+  /* HEADER */
+  header {
+    background:linear-gradient(90deg,#0d2045,var(--royal));
+    border-bottom:2px solid var(--gold);
+    padding:1rem 2rem;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100;
+  }
+  .hdr-title { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--gold); }
+  .hdr-sub { font-size:0.72rem; color:rgba(253,248,238,0.5); letter-spacing:0.06em; text-transform:uppercase; }
+  .nav-links { display:flex; gap:0.8rem; }
+  .nav-link {
+    padding:0.45rem 1rem; border-radius:8px; font-size:0.82rem; font-weight:600;
+    text-decoration:none; transition:all 0.2s;
+    background:rgba(255,255,255,0.06); color:rgba(253,248,238,0.7);
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .nav-link:hover { background:rgba(255,255,255,0.12); color:var(--cream); }
+  .nav-link.active { background:rgba(201,168,76,0.15); color:var(--gold); border-color:rgba(201,168,76,0.3); }
+
+  /* MAIN */
+  main { max-width:1000px; margin:0 auto; padding:2rem 1rem; display:none; }
+  .section-title {
+    font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--gold);
+    margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem;
+  }
+
+  /* BALLOT CONTROL */
+  .control-panel {
+    background:linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.1); border-radius:var(--radius);
+    padding:2rem; margin-bottom:2rem;
+  }
+  .ballot-status-display {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:1.5rem;
+  }
+  .status-indicator {
+    display:flex; align-items:center; gap:1rem;
+  }
+  .status-dot {
+    width:18px; height:18px; border-radius:50%;
+    background:var(--red); box-shadow:0 0 0 6px rgba(192,57,43,0.2);
+    transition:all 0.4s;
+  }
+  .status-dot.open {
+    background:var(--green); box-shadow:0 0 0 6px rgba(39,174,96,0.2);
+    animation:blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{box-shadow:0 0 0 6px rgba(39,174,96,0.2)} 50%{box-shadow:0 0 0 12px rgba(39,174,96,0.06)} }
+  .status-text { font-size:1.2rem; font-weight:600; }
+  .status-text.open { color:var(--green); }
+  .status-text.closed { color:var(--red); }
+  .big-toggle {
+    display:flex; gap:1rem;
+  }
+  .toggle-btn {
+    padding:0.9rem 2.2rem; border-radius:50px; font-size:1rem; font-weight:700;
+    border:none; cursor:pointer; font-family:'DM Sans',sans-serif;
+    transition:all 0.2s;
+  }
+  .toggle-open { background:linear-gradient(135deg,var(--green),#2ecc71); color:white; box-shadow:0 4px 16px rgba(39,174,96,0.3); }
+  .toggle-open:hover { transform:translateY(-2px); }
+  .toggle-close { background:linear-gradient(135deg,var(--red),#e74c3c); color:white; box-shadow:0 4px 16px rgba(192,57,43,0.3); }
+  .toggle-close:hover { transform:translateY(-2px); }
+
+  /* LIVE STATS */
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:2rem; }
+  .stat-card {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; padding:1.2rem;
+    text-align:center;
+  }
+  .stat-num { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--gold); line-height:1; }
+  .stat-label { font-size:0.78rem; color:rgba(253,248,238,0.5); text-transform:uppercase; letter-spacing:0.06em; margin-top:4px; }
+
+  /* POST MANAGEMENT */
+  .post-list { display:flex; flex-direction:column; gap:1.2rem; }
+  .post-manage-card {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; overflow:hidden;
+  }
+  .post-manage-header {
+    padding:1rem 1.4rem; display:flex; align-items:center; gap:1rem;
+    cursor:pointer; user-select:none;
+    background:rgba(255,255,255,0.02);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .post-manage-header:hover { background:rgba(255,255,255,0.05); }
+  .post-manage-icon { font-size:1.4rem; }
+  .post-manage-title { font-weight:600; flex:1; }
+  .post-manage-toggle { font-size:0.8rem; color:rgba(253,248,238,0.4); }
+  .post-manage-body { display:none; padding:1.2rem 1.4rem; }
+  .post-manage-body.open { display:block; }
+  .cand-edit-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.8rem; }
+  .cand-edit-item {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:12px; padding:0.9rem;
+    display:flex; align-items:center; gap:0.8rem;
+  }
+  .cand-edit-thumb {
+    width:48px; height:48px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+    overflow:hidden; flex-shrink:0; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; position:relative;
+  }
+  .cand-edit-thumb img { width:100%; height:100%; object-fit:cover; }
+  .cand-edit-thumb:hover::after {
+    content:'📷'; position:absolute; inset:0; background:rgba(0,0,0,0.6);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; border-radius:50%;
+  }
+  .cand-edit-info { flex:1; min-width:0; }
+  .cand-edit-name-input {
+    width:100%; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.15);
+    color:var(--cream); font-family:'DM Sans',sans-serif; font-size:0.85rem;
+    padding:2px 0; outline:none; margin-bottom:3px;
+  }
+  .cand-edit-name-input:focus { border-color:var(--gold); }
+  .cand-edit-cls { font-size:0.72rem; color:rgba(253,248,238,0.4); }
+  .cand-photo-btns { display:flex; gap:5px; margin-top:5px; }
+  .mini-btn {
+    font-size:0.68rem; padding:2px 7px; border-radius:20px; border:none;
+    cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600;
+  }
+  .mini-upload { background:rgba(201,168,76,0.15); color:var(--gold-light); }
+  .mini-drive { background:rgba(52,152,219,0.15); color:#74b9e0; }
+  .mini-clear { background:rgba(192,57,43,0.15); color:#e88; }
+
+  input[type=file] { display:none; }
+
+  /* VOTER LOG */
+  .voter-log { max-height:300px; overflow-y:auto; }
+  .voter-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0.7rem 1rem; border-bottom:1px solid rgba(255,255,255,0.05);
+    font-size:0.83rem;
+  }
+  .voter-row:last-child { border-bottom:none; }
+  .voter-id-cell { color:var(--gold); font-weight:600; }
+  .voter-time-cell { color:rgba(253,248,238,0.4); font-size:0.75rem; }
+
+  .save-btn {
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    color:var(--navy); border:none; border-radius:50px;
+    padding:0.65rem 1.8rem; font-family:'DM Sans',sans-serif;
+    font-weight:700; font-size:0.88rem; cursor:pointer;
+    transition:all 0.2s; margin-top:1rem;
+  }
+  .save-btn:hover { transform:translateY(-2px); }
+  .save-success {
+    display:inline-block; color:var(--green); font-size:0.8rem; margin-left:0.8rem;
+    opacity:0; transition:opacity 0.3s;
+  }
+
+  /* Google Drive modal */
+  #drive-modal {
+    position:fixed; inset:0; z-index:800; background:rgba(10,22,40,0.9);
+    display:none; align-items:center; justify-content:center; padding:2rem;
+  }
+  .drive-box {
+    background:linear-gradient(160deg,#0d2045,#1a3a6b);
+    border:1px solid rgba(201,168,76,0.3); border-radius:20px;
+    padding:2rem; max-width:460px; width:100%;
+  }
+  .drive-title { font-family:'Playfair Display',serif; color:var(--gold); margin-bottom:0.5rem; }
+  .drive-sub { color:rgba(253,248,238,0.5); font-size:0.84rem; margin-bottom:1.5rem; }
+  .drive-input {
+    width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+    border-radius:10px; padding:0.8rem 1rem; color:var(--cream);
+    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
+    margin-bottom:0.5rem;
+  }
+  .drive-input:focus { border-color:var(--gold); }
+  .drive-hint { font-size:0.72rem; color:rgba(253,248,238,0.35); margin-bottom:1.2rem; }
+  .drive-actions { display:flex; gap:0.8rem; }
+  .btn-cancel { background:rgba(255,255,255,0.08); color:var(--cream); border:1px solid rgba(255,255,255,0.15); }
+
+  @media(max-width:600px) {
+    .ballot-status-display { flex-direction:column; }
+    .nav-links { flex-wrap:wrap; }
+    header { padding:0.8rem 1rem; flex-direction:column; gap:0.8rem; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">Admin Access</div>
+    <div class="login-sub">Ballot Control Panel · Election Staff Only</div>
+    <div class="login-error" id="login-error">❌ Incorrect password</div>
+    <div class="input-group">
+      <input type="password" id="pwd-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-hint">Default password: <strong>admin123</strong></div>
+    <button class="btn btn-gold" onclick="doLogin()">Enter Control Panel →</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="hdr-title">🗂️ Ballot Control Panel</div>
+    <div class="hdr-sub">Election Administration</div>
+  </div>
+  <div class="nav-links">
+    <a href="vote.html" class="nav-link" target="_blank">🗳️ Voting Page</a>
+    <a href="results.html" class="nav-link" target="_blank">📊 Results</a>
+    <a href="ballot.html" class="nav-link active">⚙️ Control</a>
+  </div>
+</header>
+
+<main id="admin-main">
+
+  <!-- STATS ROW -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Votes Cast</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-posts">8</div><div class="stat-label">Open Posts</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-cands">52</div><div class="stat-label">Candidates</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-status">—</div><div class="stat-label">Ballot Status</div></div>
+  </div>
+
+  <!-- BALLOT CONTROL -->
+  <div class="control-panel" style="margin-bottom:2rem">
+    <div class="section-title" style="margin-bottom:1.5rem">⚡ Ballot Control</div>
+    <div class="ballot-status-display">
+      <div class="status-indicator">
+        <div class="status-dot" id="big-dot"></div>
+        <div>
+          <div class="status-text closed" id="big-status-text">BALLOT CLOSED</div>
+          <div style="font-size:0.8rem;color:rgba(253,248,238,0.4)" id="ballot-time-label">Not opened yet</div>
+        </div>
+      </div>
+      <div class="big-toggle">
+        <button class="toggle-btn toggle-open" id="open-btn" onclick="openBallot()">🟢 Open Ballot</button>
+        <button class="toggle-btn toggle-close" id="close-btn" onclick="closeBallot()" style="display:none">🔴 Close Ballot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST & CANDIDATE MANAGEMENT -->
+  <div class="section-title">👤 Manage Candidates & Photos</div>
+  <div class="post-list" id="post-list"></div>
+
+  <!-- VOTER LOG -->
+  <div class="section-title" style="margin-top:2rem">📋 Live Voter Log</div>
+  <div class="control-panel" style="padding:0">
+    <div class="voter-log" id="voter-log">
+      <div style="padding:1.5rem;text-align:center;color:rgba(253,248,238,0.3)">No votes recorded yet</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- GOOGLE DRIVE MODAL -->
+<div id="drive-modal">
+  <div class="drive-box">
+    <div class="drive-title">📁 Set Photo from Google Drive</div>
+    <div class="drive-sub">Paste the direct image link from Google Drive (must be set to "Anyone with the link can view").</div>
+    <input class="drive-input" id="drive-url-input" placeholder="https://drive.google.com/uc?id=FILE_ID" />
+    <div class="drive-hint">Tip: In Google Drive, right-click image → "Get link" → change to Anyone → copy link.<br>Then replace '/file/d/FILE_ID/view' with '/uc?id=FILE_ID'</div>
+    <div class="drive-actions">
+      <button class="btn btn-cancel" onclick="closeDriveModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="applyDriveUrl()">Set Photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const POSTS = [
+  { id:'sports',  name:'Sports Captain',      icon:'⚽', candidates:[
+    {name:'Arjun Menon',cls:'Grade 10A',emoji:'👦'},{name:'Riya Thomas',cls:'Grade 10B',emoji:'👧'},
+    {name:'Kevin Joseph',cls:'Grade 9A',emoji:'👦'},{name:'Sneha Pillai',cls:'Grade 9B',emoji:'👧'},
+    {name:'Faiz Rahman',cls:'Grade 11A',emoji:'👦'},{name:'Divya Nair',cls:'Grade 11B',emoji:'👧'},
+    {name:'Nikhil Das',cls:'Grade 8A',emoji:'👦'}]},
+  { id:'arts',    name:'Arts Secretary',       icon:'🎨', candidates:[
+    {name:'Meera Suresh',cls:'Grade 10A',emoji:'👧'},{name:'Aarav Sharma',cls:'Grade 10C',emoji:'👦'},
+    {name:'Priya Krishnan',cls:'Grade 9C',emoji:'👧'},{name:'Rohit Varma',cls:'Grade 11A',emoji:'👦'},
+    {name:'Lakshmi Iyer',cls:'Grade 8B',emoji:'👧'},{name:'Sanjay Paul',cls:'Grade 9A',emoji:'👦'}]},
+  { id:'science', name:'Science Club Head',    icon:'🔬', candidates:[
+    {name:'Aditya Kumar',cls:'Grade 11A',emoji:'👦'},{name:'Nisha George',cls:'Grade 10B',emoji:'👧'},
+    {name:'Rahul Singh',cls:'Grade 9A',emoji:'👦'},{name:'Anjali Reddy',cls:'Grade 10C',emoji:'👧'},
+    {name:'Vivek Nambiar',cls:'Grade 11B',emoji:'👦'},{name:'Pooja Menon',cls:'Grade 8A',emoji:'👧'},
+    {name:'Ishaan Verma',cls:'Grade 9B',emoji:'👦'}]},
+  { id:'eco',     name:'Eco Club Leader',      icon:'🌿', candidates:[
+    {name:'Gouri Sreekumar',cls:'Grade 10A',emoji:'👧'},{name:'Manu Krishnan',cls:'Grade 9B',emoji:'👦'},
+    {name:'Sahana Das',cls:'Grade 11C',emoji:'👧'},{name:'Aryan Nair',cls:'Grade 8B',emoji:'👦'},
+    {name:'Kavya Balan',cls:'Grade 10B',emoji:'👧'},{name:'Dev Shankar',cls:'Grade 9A',emoji:'👦'}]},
+  { id:'head',    name:'Head Boy/Girl',        icon:'👑', candidates:[
+    {name:'Tanvi Mathew',cls:'Grade 12A',emoji:'👧'},{name:'Shreyas Pillai',cls:'Grade 12B',emoji:'👦'},
+    {name:'Amelia Jose',cls:'Grade 12A',emoji:'👧'},{name:'Kiran Mohan',cls:'Grade 12C',emoji:'👦'},
+    {name:'Bhavna Rajan',cls:'Grade 12B',emoji:'👧'},{name:'Rohan Thomas',cls:'Grade 12A',emoji:'👦'}]},
+  { id:'lit',     name:'Literary Captain',     icon:'📚', candidates:[
+    {name:'Swati Nair',cls:'Grade 10A',emoji:'👧'},{name:'Ajith Kumar',cls:'Grade 9C',emoji:'👦'},
+    {name:'Renu Pillai',cls:'Grade 11A',emoji:'👧'},{name:'Ashwin Dev',cls:'Grade 8A',emoji:'👦'},
+    {name:'Nandini Roy',cls:'Grade 10B',emoji:'👧'},{name:'Sreeraj Menon',cls:'Grade 9A',emoji:'👦'},
+    {name:'Hema Krishnan',cls:'Grade 11B',emoji:'👧'}]},
+  { id:'music',   name:'Music & Band Head',    icon:'🎵', candidates:[
+    {name:'Jesna Jacob',cls:'Grade 10C',emoji:'👧'},{name:'Akash Varma',cls:'Grade 9B',emoji:'👦'},
+    {name:'Treesa Paul',cls:'Grade 11A',emoji:'👧'},{name:'Nitin Suresh',cls:'Grade 8B',emoji:'👦'},
+    {name:'Gayathri Nair',cls:'Grade 10A',emoji:'👧'},{name:'Suraj Das',cls:'Grade 9A',emoji:'👦'}]},
+  { id:'welfare', name:'Student Welfare Rep',  icon:'🤝', candidates:[
+    {name:'Parvathy Raj',cls:'Grade 10B',emoji:'👧'},{name:'Adithya Nair',cls:'Grade 11A',emoji:'👦'},
+    {name:'Sreelakshmi K',cls:'Grade 9C',emoji:'👧'},{name:'Thomas Mathew',cls:'Grade 8A',emoji:'👦'},
+    {name:'Anjana Suresh',cls:'Grade 10C',emoji:'👧'},{name:'Jeevan Paul',cls:'Grade 9A',emoji:'👦'},
+    {name:'Vinitha Rao',cls:'Grade 11B',emoji:'👧'}]},
+];
+
+let drivePending = null; // { postId, candIdx }
+
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  const stored = localStorage.getItem('adminPassword') || 'admin123';
+  if (pwd === stored) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-main').style.display = 'block';
+    initAdmin();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function initAdmin() {
+  renderPostList();
+  updateStats();
+  updateBallotUI();
+  updateVoterLog();
+  setInterval(() => { updateStats(); updateVoterLog(); }, 3000);
+}
+
+function updateBallotUI() {
+  const s = JSON.parse(localStorage.getItem('electionSettings') || '{}');
+  const isOpen = s.ballotOpen === true;
+  document.getElementById('big-dot').className = 'status-dot' + (isOpen ? ' open' : '');
+  const st = document.getElementById('big-status-text');
+  st.textContent = isOpen ? 'BALLOT OPEN' : 'BALLOT CLOSED';
+  st.className = 'status-text ' + (isOpen ? 'open' : 'closed');
+  document.getElementById('stat-status').textContent = isOpen ? '🟢' : '🔴';
+  document.getElementById('open-btn').style.display = isOpen ? 'none' : 'inline-block';
+  document.getElementById('close-btn').style.display = isOpen ? 'inline-block' : 'none';
+  if (isOpen && s.openedAt) {
+    const d = new Date(s.openedAt);
+    document.getElementById('ballot-time-label').textContent = 'Opened at ' + d.toLocaleTimeString();
+  } else if (!isOpen && s.closedAt) {
+    const d = new Date(s.closedAt);
+    document.getElementById('ballot-time-label').textContent = 'Last closed at ' + d.toLocaleTimeString();
+  }
+}
+
+function openBallot() {
+  if (!confirm('Open the ballot? Students will be able to vote.')) return;
+  const s = JSON.parse(localStorage.getItem('electionSettings') || '{}');
+  s.ballotOpen = true; s.openedAt = new Date().toISOString();
+  localStorage.setItem('electionSettings', JSON.stringify(s));
+  updateBallotUI();
+}
+function closeBallot() {
+  if (!confirm('Close the ballot? No more votes can be cast.')) return;
+  const s = JSON.parse(localStorage.getItem('electionSettings') || '{}');
+  s.ballotOpen = false; s.closedAt = new Date().toISOString();
+  localStorage.setItem('electionSettings', JSON.stringify(s));
+  updateBallotUI();
+}
+
+function updateStats() {
+  const votes = JSON.parse(localStorage.getItem('electionVotes') || '[]');
+  document.getElementById('stat-total').textContent = votes.length;
+  let totalCands = 0; POSTS.forEach(p => totalCands += p.candidates.length);
+  document.getElementById('stat-cands').textContent = totalCands;
+}
+
+function updateVoterLog() {
+  const votes = JSON.parse(localStorage.getItem('electionVotes') || '[]');
+  const log = document.getElementById('voter-log');
+  if (!votes.length) {
+    log.innerHTML = '<div style="padding:1.5rem;text-align:center;color:rgba(253,248,238,0.3)">No votes recorded yet</div>';
+    return;
+  }
+  log.innerHTML = [...votes].reverse().map(v => `
+    <div class="voter-row">
+      <span class="voter-id-cell">${v.voter}</span>
+      <span style="color:rgba(253,248,238,0.6);font-size:0.78rem">All 8 posts voted</span>
+      <span class="voter-time-cell">${new Date(v.time).toLocaleTimeString()}</span>
+    </div>`).join('');
+}
+
+function renderPostList() {
+  const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
+  const list = document.getElementById('post-list');
+  list.innerHTML = '';
+  POSTS.forEach(post => {
+    const cd = customData[post.id] || {};
+    const div = document.createElement('div');
+    div.className = 'post-manage-card';
+    const candsHTML = post.candidates.map((c, ci) => {
+      const custom = (cd.candidates || [])[ci] || {};
+      const photo = custom.photo || null;
+      const name = custom.name || c.name;
+      return `
+        <div class="cand-edit-item">
+          <div class="cand-edit-thumb" id="thumb-${post.id}-${ci}" onclick="uploadPhoto('${post.id}',${ci})">
+            ${photo ? `<img id="photo-${post.id}-${ci}" src="${photo}" alt="">` : `<span id="photo-${post.id}-${ci}">${c.emoji}</span>`}
+          </div>
+          <div class="cand-edit-info">
+            <input class="cand-edit-name-input" id="name-${post.id}-${ci}" value="${name}" placeholder="Candidate name">
+            <div class="cand-edit-cls">${c.cls}</div>
+            <div class="cand-photo-btns">
+              <input type="file" id="file-${post.id}-${ci}" accept="image/*" onchange="handleFileUpload('${post.id}',${ci},this)">
+              <button class="mini-btn mini-upload" onclick="document.getElementById('file-${post.id}-${ci}').click()">📷 Upload</button>
+              <button class="mini-btn mini-drive" onclick="openDriveModal('${post.id}',${ci})">☁️ Drive</button>
+              ${photo ? `<button class="mini-btn mini-clear" onclick="clearPhoto('${post.id}',${ci})">✕</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    div.innerHTML = `
+      <div class="post-manage-header" onclick="togglePost('body-${post.id}',this)">
+        <div class="post-manage-icon">${post.icon}</div>
+        <div class="post-manage-title">${post.name} <span style="color:rgba(253,248,238,0.35);font-weight:400;font-size:0.82rem">(${post.candidates.length} candidates)</span></div>
+        <div class="post-manage-toggle">▼ Expand</div>
+      </div>
+      <div class="post-manage-body" id="body-${post.id}">
+        <div class="cand-edit-grid">${candsHTML}</div>
+        <button class="save-btn" onclick="savePost('${post.id}')">💾 Save Changes</button>
+        <span class="save-success" id="save-ok-${post.id}">✓ Saved!</span>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function togglePost(bodyId, header) {
+  const body = document.getElementById(bodyId);
+  const tog = header.querySelector('.post-manage-toggle');
+  const open = body.classList.toggle('open');
+  tog.textContent = open ? '▲ Collapse' : '▼ Expand';
+}
+
+function handleFileUpload(postId, ci, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => setPhoto(postId, ci, e.target.result);
+  reader.readAsDataURL(file);
+}
+
+function setPhoto(postId, ci, url) {
+  const thumb = document.getElementById(`thumb-${postId}-${ci}`);
+  const el = document.getElementById(`photo-${postId}-${ci}`);
+  if (el.tagName === 'IMG') { el.src = url; }
+  else {
+    const img = document.createElement('img');
+    img.id = `photo-${postId}-${ci}`; img.src = url; img.alt = '';
+    el.replaceWith(img);
+  }
+  // Store temporarily
+  if (!window._pendingPhotos) window._pendingPhotos = {};
+  if (!window._pendingPhotos[postId]) window._pendingPhotos[postId] = {};
+  window._pendingPhotos[postId][ci] = url;
+}
+
+function clearPhoto(postId, ci) {
+  const post = POSTS.find(p=>p.id===postId);
+  const emoji = post?.candidates[ci]?.emoji || '?';
+  const el = document.getElementById(`photo-${postId}-${ci}`);
+  if (el.tagName === 'IMG') {
+    const span = document.createElement('span');
+    span.id = `photo-${postId}-${ci}`; span.textContent = emoji;
+    el.replaceWith(span);
+  }
+  if (window._pendingPhotos?.[postId]) delete window._pendingPhotos[postId][ci];
+  // Remove from storage
+  const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
+  if (customData[postId]?.candidates?.[ci]) delete customData[postId].candidates[ci].photo;
+  localStorage.setItem('electionPostData', JSON.stringify(customData));
+}
+
+function savePost(postId) {
+  const post = POSTS.find(p=>p.id===postId);
+  const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
+  if (!customData[postId]) customData[postId] = { candidates: [] };
+  post.candidates.forEach((c, ci) => {
+    if (!customData[postId].candidates[ci]) customData[postId].candidates[ci] = {};
+    const nameEl = document.getElementById(`name-${postId}-${ci}`);
+    if (nameEl) customData[postId].candidates[ci].name = nameEl.value;
+    const pendingPhoto = window._pendingPhotos?.[postId]?.[ci];
+    if (pendingPhoto) customData[postId].candidates[ci].photo = pendingPhoto;
+  });
+  localStorage.setItem('electionPostData', JSON.stringify(customData));
+  const ok = document.getElementById(`save-ok-${postId}`);
+  ok.style.opacity = '1'; setTimeout(() => ok.style.opacity = '0', 2000);
+}
+
+function openDriveModal(postId, ci) {
+  drivePending = { postId, ci };
+  document.getElementById('drive-url-input').value = '';
+  document.getElementById('drive-modal').style.display = 'flex';
+}
+function closeDriveModal() {
+  document.getElementById('drive-modal').style.display = 'none';
+  drivePending = null;
+}
+function applyDriveUrl() {
+  if (!drivePending) return;
+  let url = document.getElementById('drive-url-input').value.trim();
+  // Auto-convert Google Drive share link
+  const m = url.match(/\/file\/d\/([^\/]+)/);
+  if (m) url = `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  if (!url) return;
+  setPhoto(drivePending.postId, drivePending.ci, url);
+  closeDriveModal();
+}
+
+function uploadPhoto(postId, ci) {
+  document.getElementById(`file-${postId}-${ci}`)?.click();
+}
+</script>
+</body>
+</html>
