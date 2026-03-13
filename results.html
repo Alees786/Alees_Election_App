@@ -3,182 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Election Results 2026-27 — Nusrath School Parliament</title>
+<title>Election Results — Nusrath School Parliament 2026-27</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --navy: #0a1628; --royal: #1a3a6b; --gold: #c9a84c; --gold-light: #f0d080;
-    --cream: #fdf8ee; --red: #c0392b; --green: #27ae60;
-    --silver: #a8b3c5; --bronze: #cd7f32;
-    --shadow: 0 8px 32px rgba(10,22,40,0.2); --radius: 16px;
-  }
-  * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family:'DM Sans',sans-serif; background:var(--navy); color:var(--cream); min-height:100vh; }
-
-  /* LOGIN */
-  #login-screen {
-    position:fixed; inset:0; z-index:9999;
-    background:linear-gradient(135deg,var(--navy),#0d2045);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem;
-  }
-  .login-box {
-    background:linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
-    border:1px solid rgba(201,168,76,0.3); border-radius:20px;
-    padding:2.5rem; max-width:400px; width:100%;
-  }
-  .login-icon { font-size:2.5rem; margin-bottom:1rem; text-align:center; }
-  .login-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--gold); margin-bottom:0.4rem; text-align:center; }
-  .login-sub { color:rgba(253,248,238,0.5); font-size:0.85rem; margin-bottom:1.8rem; text-align:center; }
-  .input-group input {
-    width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
-    border-radius:10px; padding:0.85rem 1rem; color:var(--cream);
-    font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; margin-bottom:1rem;
-    transition:border-color 0.2s;
-  }
-  .input-group input:focus { border-color:var(--gold); }
-  .login-hint { font-size:0.72rem; color:rgba(253,248,238,0.35); margin-bottom:1.5rem; text-align:center; }
-  .login-error { display:none; color:#e88; font-size:0.82rem; margin-bottom:1rem; text-align:center; }
-  .btn { border:none; border-radius:50px; padding:0.8rem 2rem; font-family:'DM Sans',sans-serif; font-weight:600; cursor:pointer; transition:all 0.2s; width:100%; }
-  .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--navy); }
-  .btn-gold:hover { transform:translateY(-2px); }
-
-  /* HEADER */
-  header {
-    background:linear-gradient(90deg,#0d2045,var(--royal));
-    border-bottom:2px solid var(--gold);
-    padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;
-    position:sticky; top:0; z-index:100;
-  }
-  .hdr-title { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--gold); }
-  .hdr-sub { font-size:0.72rem; color:rgba(253,248,238,0.5); letter-spacing:0.06em; text-transform:uppercase; }
-  .nav-links { display:flex; gap:0.8rem; flex-wrap:wrap; }
-  .nav-link {
-    padding:0.45rem 1rem; border-radius:8px; font-size:0.82rem; font-weight:600;
-    text-decoration:none; transition:all 0.2s;
-    background:rgba(255,255,255,0.06); color:rgba(253,248,238,0.7);
-    border:1px solid rgba(255,255,255,0.1);
-  }
-  .nav-link:hover { background:rgba(255,255,255,0.12); }
-  .nav-link.active { background:rgba(201,168,76,0.15); color:var(--gold); border-color:rgba(201,168,76,0.3); }
-
-  /* MAIN */
-  main { max-width:1000px; margin:0 auto; padding:2rem 1rem 4rem; display:none; }
-
-  /* SUMMARY HERO */
-  .results-hero {
-    text-align:center; padding:2rem 1rem 1rem;
-    margin-bottom:2rem;
-  }
-  .results-hero-title {
-    font-family:'Playfair Display',serif;
-    font-size:clamp(1.8rem,4vw,2.8rem); color:var(--gold);
-    margin-bottom:0.5rem;
-  }
-  .results-hero-sub { color:rgba(253,248,238,0.5); font-size:0.95rem; }
-  .results-stats { display:flex; justify-content:center; gap:3rem; margin-top:1.5rem; flex-wrap:wrap; }
-  .res-stat { text-align:center; }
-  .res-stat-num { font-family:'Playfair Display',serif; font-size:2.4rem; color:var(--gold); line-height:1; }
-  .res-stat-lbl { font-size:0.75rem; color:rgba(253,248,238,0.4); text-transform:uppercase; letter-spacing:0.06em; }
-
-  /* TOOLBAR */
-  .toolbar { display:flex; gap:0.8rem; margin-bottom:2rem; flex-wrap:wrap; align-items:center; }
-  .tool-btn {
-    padding:0.55rem 1.3rem; border-radius:50px; font-size:0.82rem; font-weight:600;
-    border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06);
-    color:var(--cream); cursor:pointer; font-family:'DM Sans',sans-serif;
-    transition:all 0.2s;
-  }
-  .tool-btn:hover { background:rgba(255,255,255,0.12); }
-  .tool-btn.danger { border-color:rgba(192,57,43,0.4); color:#e88; background:rgba(192,57,43,0.08); }
-  .tool-btn.danger:hover { background:rgba(192,57,43,0.16); }
-  .auto-refresh-label { margin-left:auto; font-size:0.78rem; color:rgba(253,248,238,0.35); }
+  :root{--navy:#0a1628;--royal:#1a3a6b;--gold:#c9a84c;--gold-light:#f0d080;--cream:#fdf8ee;--red:#c0392b;--green:#27ae60;--silver:#a8b3c5;--bronze:#cd7f32;--radius:16px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--cream);min-height:100vh}
+  #login-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--navy),#0d2045);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+  .login-box{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:2.5rem;max-width:400px;width:100%}
+  .login-icon{font-size:2.5rem;text-align:center;margin-bottom:1rem}
+  .login-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gold);margin-bottom:.4rem;text-align:center}
+  .login-sub{color:rgba(253,248,238,.5);font-size:.85rem;margin-bottom:1.8rem;text-align:center}
+  .input-group input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.85rem 1rem;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;margin-bottom:1rem;transition:border-color .2s}
+  .input-group input:focus{border-color:var(--gold)}
+  .login-hint{font-size:.72rem;color:rgba(253,248,238,.35);margin-bottom:1.5rem;text-align:center}
+  .login-error{display:none;color:#e88;font-size:.82rem;margin-bottom:1rem;text-align:center}
+  .btn{border:none;border-radius:50px;padding:.8rem 2rem;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;width:100%}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy)}
+  .btn-gold:hover{transform:translateY(-2px)}
+  header{background:linear-gradient(90deg,#0d2045,var(--royal));border-bottom:2px solid var(--gold);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:.5rem}
+  .hdr-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold)}
+  .hdr-sub{font-size:.72rem;color:rgba(253,248,238,.5);letter-spacing:.06em;text-transform:uppercase}
+  .nav-links{display:flex;gap:.8rem;flex-wrap:wrap}
+  .nav-link{padding:.45rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s;background:rgba(255,255,255,.06);color:rgba(253,248,238,.7);border:1px solid rgba(255,255,255,.1)}
+  .nav-link:hover{background:rgba(255,255,255,.12)}
+  .nav-link.active{background:rgba(201,168,76,.15);color:var(--gold);border-color:rgba(201,168,76,.3)}
+  main{max-width:1000px;margin:0 auto;padding:2rem 1rem 4rem;display:none}
+  .results-hero{text-align:center;padding:2rem 1rem 1rem;margin-bottom:2rem}
+  .results-hero-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--gold);margin-bottom:.5rem}
+  .results-hero-sub{color:rgba(253,248,238,.5);font-size:.95rem}
+  .results-stats{display:flex;justify-content:center;gap:3rem;margin-top:1.5rem;flex-wrap:wrap}
+  .res-stat{text-align:center}
+  .res-stat-num{font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--gold);line-height:1}
+  .res-stat-lbl{font-size:.75rem;color:rgba(253,248,238,.4);text-transform:uppercase;letter-spacing:.06em}
+  .toolbar{display:flex;gap:.8rem;margin-bottom:2rem;flex-wrap:wrap;align-items:center}
+  .tool-btn{padding:.55rem 1.3rem;border-radius:50px;font-size:.82rem;font-weight:600;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+  .tool-btn:hover{background:rgba(255,255,255,.12)}
+  .tool-btn.danger{border-color:rgba(192,57,43,.4);color:#e88;background:rgba(192,57,43,.08)}
+  .tool-btn.danger:hover{background:rgba(192,57,43,.16)}
+  .tool-btn.active-btn{background:rgba(201,168,76,.2);border-color:rgba(201,168,76,.4);color:var(--gold)}
+  .auto-refresh-label{margin-left:auto;font-size:.78rem;color:rgba(253,248,238,.35)}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(39,174,96,.12);border:1px solid rgba(39,174,96,.3);border-radius:50px;padding:3px 10px;font-size:.75rem;color:#6ddd9a}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#27ae60;animation:blink 1.5s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
   /* POST RESULT CARD */
-  .post-result-card {
-    background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:var(--radius); margin-bottom:1.5rem; overflow:hidden;
-  }
-  .prc-header {
-    padding:1.2rem 1.6rem;
-    background:linear-gradient(90deg,rgba(26,58,107,0.5),transparent);
-    border-bottom:1px solid rgba(255,255,255,0.07);
-    display:flex; align-items:center; gap:1rem;
-  }
-  .prc-icon { font-size:1.5rem; }
-  .prc-title { font-family:'Playfair Display',serif; font-size:1.1rem; flex:1; }
-  .prc-total { font-size:0.78rem; color:rgba(253,248,238,0.4); }
-  .prc-body { padding:1.2rem 1.6rem; }
+  .post-result-card{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);margin-bottom:1.5rem;overflow:hidden}
+  .prc-header{padding:1.2rem 1.6rem;background:linear-gradient(90deg,rgba(26,58,107,.5),transparent);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+  .prc-icon{font-size:1.5rem}
+  .prc-title{font-family:'Playfair Display',serif;font-size:1.1rem;flex:1}
+  .prc-total{font-size:.78rem;color:rgba(253,248,238,.4)}
+  .prc-body{padding:1.2rem 1.6rem}
+  .cand-result-row{display:flex;align-items:center;gap:.9rem;margin-bottom:.9rem;position:relative}
+  .cand-rank{width:24px;text-align:center;font-size:.8rem;font-weight:700;flex-shrink:0;color:rgba(253,248,238,.3)}
+  .cand-rank.rank-1{color:var(--gold)}.cand-rank.rank-2{color:var(--silver)}.cand-rank.rank-3{color:var(--bronze)}
+  .cand-res-photo{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:2px solid rgba(255,255,255,.1);overflow:hidden}
+  .cand-res-photo img{width:100%;height:100%;object-fit:cover}
+  .cand-res-photo.rank-1{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.2)}
+  .cand-res-info{flex:1;min-width:0}
+  .cand-res-name{font-size:.88rem;font-weight:600}
+  .cand-res-bar-wrap{position:relative;height:8px;background:rgba(255,255,255,.07);border-radius:99px;margin-top:5px;overflow:hidden}
+  .cand-res-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,rgba(201,168,76,.5),var(--gold));transition:width .8s cubic-bezier(.22,1,.36,1)}
+  .cand-res-bar.rank-2{background:linear-gradient(90deg,rgba(168,179,197,.5),var(--silver))}
+  .cand-res-bar.rank-3{background:linear-gradient(90deg,rgba(205,127,50,.5),var(--bronze))}
+  .cand-res-bar.other{background:rgba(255,255,255,.15)}
+  .cand-res-count{min-width:50px;text-align:right;font-size:.85rem;font-weight:600;color:var(--gold-light)}
+  .cand-res-pct{min-width:40px;text-align:right;font-size:.75rem;color:rgba(253,248,238,.4)}
+  .winner-crown{display:inline-block;margin-left:6px;font-size:.85rem;animation:float 2s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .no-votes{text-align:center;padding:2rem;color:rgba(253,248,238,.3);font-size:.9rem}
+  .chart-wrap{display:none;padding:1.2rem 1.6rem 1.6rem;border-top:1px solid rgba(255,255,255,.07)}
+  .chart-wrap.show{display:block}
+  .chart-inner{max-width:340px;margin:0 auto}
 
-  /* CANDIDATE BAR */
-  .cand-result-row {
-    display:flex; align-items:center; gap:0.9rem;
-    margin-bottom:0.9rem; position:relative;
-  }
-  .cand-rank {
-    width:24px; text-align:center; font-size:0.8rem; font-weight:700;
-    flex-shrink:0; color:rgba(253,248,238,0.3);
-  }
-  .cand-rank.rank-1 { color:var(--gold); }
-  .cand-rank.rank-2 { color:var(--silver); }
-  .cand-rank.rank-3 { color:var(--bronze); }
-  .cand-res-photo {
-    width:38px; height:38px; border-radius:50%;
-    background:rgba(255,255,255,0.06); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:1.1rem;
-    border:2px solid rgba(255,255,255,0.1); overflow:hidden;
-  }
-  .cand-res-photo img { width:100%; height:100%; object-fit:cover; }
-  .cand-res-photo.rank-1 { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.2); }
-  .cand-res-info { flex:1; min-width:0; }
-  .cand-res-name { font-size:0.88rem; font-weight:600; }
-  .cand-res-bar-wrap { position:relative; height:8px; background:rgba(255,255,255,0.07); border-radius:99px; margin-top:5px; overflow:hidden; }
-  .cand-res-bar {
-    height:100%; border-radius:99px;
-    background:linear-gradient(90deg,rgba(201,168,76,0.5),var(--gold));
-    transition:width 0.8s cubic-bezier(0.22,1,0.36,1);
-  }
-  .cand-res-bar.rank-2 { background:linear-gradient(90deg,rgba(168,179,197,0.5),var(--silver)); }
-  .cand-res-bar.rank-3 { background:linear-gradient(90deg,rgba(205,127,50,0.5),var(--bronze)); }
-  .cand-res-bar.other { background:rgba(255,255,255,0.15); }
-  .cand-res-count {
-    min-width:50px; text-align:right; font-size:0.85rem; font-weight:600;
-    color:var(--gold-light);
-  }
-  .cand-res-pct {
-    min-width:40px; text-align:right; font-size:0.75rem;
-    color:rgba(253,248,238,0.4);
-  }
-  .winner-crown {
-    display:inline-block; margin-left:6px; font-size:0.85rem;
-    animation:float 2s ease-in-out infinite;
-  }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  /* ── PRINT STYLES ─────────────────────────────────── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff !important; color: #000 !important; font-family: 'Georgia', serif; }
+    #login-screen, header, .toolbar { display: none !important; }
+    main { display: block !important; max-width: 100% !important; padding: 0 !important; }
+    .results-hero { display: none; }
 
-  /* NO VOTES */
-  .no-votes { text-align:center; padding:2rem; color:rgba(253,248,238,0.3); font-size:0.9rem; }
+    .post-result-card {
+      page-break-after: always;
+      break-after: page;
+      background: #fff !important;
+      border: none !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .post-result-card:last-child { page-break-after: auto; break-after: auto; }
 
-  /* LIVE INDICATOR */
-  .live-badge {
-    display:inline-flex; align-items:center; gap:6px;
-    background:rgba(39,174,96,0.12); border:1px solid rgba(39,174,96,0.3);
-    border-radius:50px; padding:3px 10px; font-size:0.75rem; color:#6ddd9a;
+    .prc-header {
+      background: #000 !important; color: #fff !important;
+      padding: 1.2rem 1.6rem !important;
+      border: none !important;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .prc-icon { font-size: 1.8rem; }
+    .prc-title { font-size: 1.4rem; font-weight: 700; color: #fff !important; }
+    .prc-total { color: #ccc !important; font-size: .9rem; }
+    .prc-body { padding: 1.5rem !important; }
+
+    /* Print header block per page */
+    .print-school-hdr {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 2px solid #000; padding-bottom: .8rem; margin-bottom: 1.5rem;
+    }
+    .print-school-name { font-size: 1.1rem; font-weight: 700; color: #000; }
+    .print-election-name { font-size: .85rem; color: #333; margin-top: 3px; }
+    .print-date { font-size: .8rem; color: #555; text-align: right; }
+
+    .cand-result-row { margin-bottom: 1rem !important; }
+    .cand-rank { color: #000 !important; font-size: 1rem !important; width: 30px; }
+    .cand-rank.rank-1 { color: #000 !important; }
+    .cand-rank.rank-2 { color: #000 !important; }
+    .cand-rank.rank-3 { color: #000 !important; }
+    .cand-res-photo { width: 44px !important; height: 44px !important; border: 2px solid #000 !important; background: #eee !important; box-shadow: none !important; }
+    .cand-res-name { font-size: 1rem !important; color: #000 !important; font-weight: 700; }
+    .cand-res-bar-wrap { height: 10px !important; background: #ddd !important; }
+    .cand-res-bar { background: #000 !important; }
+    .cand-res-count { color: #000 !important; font-size: 1rem !important; font-weight: 700; min-width: 50px; }
+    .cand-res-pct { color: #333 !important; font-size: .85rem !important; }
+    .winner-crown { display: none !important; }
+    .chart-wrap { display: none !important; }
+
+    /* Rank medals as text */
+    .cand-rank.rank-1::before { content: '1st '; }
+    .cand-rank.rank-2::before { content: '2nd '; }
+    .cand-rank.rank-3::before { content: '3rd '; }
+
+    .print-footer {
+      margin-top: 1.5rem; padding-top: .8rem; border-top: 1px solid #ccc;
+      font-size: .75rem; color: #666; display: flex; justify-content: space-between;
+    }
   }
-  .live-dot { width:7px; height:7px; border-radius:50%; background:#27ae60; animation:blink 1.5s infinite; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* EXPORT */
-  .export-note { font-size:0.78rem; color:rgba(253,248,238,0.3); margin-top:0.5rem; }
-
-  @media(max-width:600px) {
-    header { flex-direction:column; gap:0.7rem; align-items:flex-start; }
-    .cand-res-count,.cand-res-pct { min-width:35px; font-size:0.75rem; }
-  }
+  @media(max-width:600px){header{flex-direction:column;gap:.7rem;align-items:flex-start}.cand-res-count,.cand-res-pct{min-width:35px;font-size:.75rem}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-icon">📊</div>
@@ -188,7 +154,7 @@
     <div class="input-group">
       <input type="password" id="pwd-input" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div class="login-hint">Default: <strong>admin123</strong></div>
+    <div class="login-hint">Default: <strong>Nusrath@444</strong></div>
     <button class="btn btn-gold" onclick="doLogin()">View Results →</button>
   </div>
 </div>
@@ -196,30 +162,32 @@
 <header>
   <div>
     <div class="hdr-title">📊 Election Results</div>
-    <div class="hdr-sub">Live Tally · School Parliament 2025</div>
+    <div class="hdr-sub">Live Tally · Nusrath School Parliament 2026-27</div>
   </div>
   <div class="nav-links">
-    <a href="vote.html" class="nav-link" target="_blank">🗳️ Voting Page</a>
+    <a href="vote.html" class="nav-link" target="_blank">🗳️ Voting</a>
     <a href="ballot.html" class="nav-link" target="_blank">⚙️ Control</a>
     <a href="results.html" class="nav-link active">📊 Results</a>
+    <a href="polling.html" class="nav-link" target="_blank">📺 Polling TV</a>
   </div>
 </header>
 
 <main id="results-main">
   <div class="results-hero">
     <div class="results-hero-title">🏛️ Parliament Election Results</div>
-    <div class="results-hero-sub">Live vote tally — updates automatically</div>
+    <div class="results-hero-sub">Live vote tally — updates every 4 seconds</div>
     <div class="results-stats">
       <div class="res-stat"><div class="res-stat-num" id="hero-total">0</div><div class="res-stat-lbl">Ballots Cast</div></div>
-      <div class="res-stat"><div class="res-stat-num" id="hero-posts">8</div><div class="res-stat-lbl">Posts</div></div>
-      <div class="res-stat"><div class="res-stat-num" id="hero-cands">52</div><div class="res-stat-lbl">Candidates</div></div>
+      <div class="res-stat"><div class="res-stat-num">8</div><div class="res-stat-lbl">Posts</div></div>
+      <div class="res-stat"><div class="res-stat-num" id="hero-pct">—</div><div class="res-stat-lbl">Polling %</div></div>
     </div>
   </div>
 
   <div class="toolbar">
     <span class="live-badge"><span class="live-dot"></span> Live</span>
+    <button class="tool-btn" id="chart-toggle-btn" onclick="toggleCharts()">📊 Show Charts</button>
     <button class="tool-btn" onclick="exportCSV()">⬇️ Export CSV</button>
-    <button class="tool-btn" onclick="printResults()">🖨️ Print</button>
+    <button class="tool-btn" onclick="printResults()">🖨️ Print (1 post/page)</button>
     <button class="tool-btn danger" onclick="resetElection()">🗑️ Reset All Data</button>
     <span class="auto-refresh-label" id="last-update">Last update: —</span>
   </div>
@@ -229,43 +197,47 @@
 
 <script>
 const POSTS = [
-  { id:'sports',  name:'Sports Captain',      icon:'⚽', candidates:[
-    {name:'Arjun Menon',cls:'Grade 10A',emoji:'👦'},{name:'Riya Thomas',cls:'Grade 10B',emoji:'👧'},
+  { id:'sports',  name:'Sports Captain',     icon:'⚽', candidates:[
+    {name:'Alees',cls:'Grade 10A',emoji:'👦'},{name:'Riya Thomas',cls:'Grade 10B',emoji:'👧'},
     {name:'Kevin Joseph',cls:'Grade 9A',emoji:'👦'},{name:'Sneha Pillai',cls:'Grade 9B',emoji:'👧'},
     {name:'Faiz Rahman',cls:'Grade 11A',emoji:'👦'},{name:'Divya Nair',cls:'Grade 11B',emoji:'👧'},
     {name:'Nikhil Das',cls:'Grade 8A',emoji:'👦'}]},
-  { id:'arts',    name:'Arts Secretary',       icon:'🎨', candidates:[
+  { id:'arts',    name:'Arts Secretary',     icon:'🎨', candidates:[
     {name:'Meera Suresh',cls:'Grade 10A',emoji:'👧'},{name:'Aarav Sharma',cls:'Grade 10C',emoji:'👦'},
     {name:'Priya Krishnan',cls:'Grade 9C',emoji:'👧'},{name:'Rohit Varma',cls:'Grade 11A',emoji:'👦'},
     {name:'Lakshmi Iyer',cls:'Grade 8B',emoji:'👧'},{name:'Sanjay Paul',cls:'Grade 9A',emoji:'👦'}]},
-  { id:'science', name:'Science Club Head',    icon:'🔬', candidates:[
+  { id:'science', name:'Science Club Head',  icon:'🔬', candidates:[
     {name:'Aditya Kumar',cls:'Grade 11A',emoji:'👦'},{name:'Nisha George',cls:'Grade 10B',emoji:'👧'},
     {name:'Rahul Singh',cls:'Grade 9A',emoji:'👦'},{name:'Anjali Reddy',cls:'Grade 10C',emoji:'👧'},
     {name:'Vivek Nambiar',cls:'Grade 11B',emoji:'👦'},{name:'Pooja Menon',cls:'Grade 8A',emoji:'👧'},
     {name:'Ishaan Verma',cls:'Grade 9B',emoji:'👦'}]},
-  { id:'eco',     name:'Eco Club Leader',      icon:'🌿', candidates:[
+  { id:'eco',     name:'Eco Club Leader',    icon:'🌿', candidates:[
     {name:'Gouri Sreekumar',cls:'Grade 10A',emoji:'👧'},{name:'Manu Krishnan',cls:'Grade 9B',emoji:'👦'},
     {name:'Sahana Das',cls:'Grade 11C',emoji:'👧'},{name:'Aryan Nair',cls:'Grade 8B',emoji:'👦'},
     {name:'Kavya Balan',cls:'Grade 10B',emoji:'👧'},{name:'Dev Shankar',cls:'Grade 9A',emoji:'👦'}]},
-  { id:'head',    name:'Head Boy/Girl',        icon:'👑', candidates:[
+  { id:'head',    name:'Head Boy/Girl',      icon:'👑', candidates:[
     {name:'Tanvi Mathew',cls:'Grade 12A',emoji:'👧'},{name:'Shreyas Pillai',cls:'Grade 12B',emoji:'👦'},
     {name:'Amelia Jose',cls:'Grade 12A',emoji:'👧'},{name:'Kiran Mohan',cls:'Grade 12C',emoji:'👦'},
     {name:'Bhavna Rajan',cls:'Grade 12B',emoji:'👧'},{name:'Rohan Thomas',cls:'Grade 12A',emoji:'👦'}]},
-  { id:'lit',     name:'Literary Captain',     icon:'📚', candidates:[
+  { id:'lit',     name:'Literary Captain',   icon:'📚', candidates:[
     {name:'Swati Nair',cls:'Grade 10A',emoji:'👧'},{name:'Ajith Kumar',cls:'Grade 9C',emoji:'👦'},
     {name:'Renu Pillai',cls:'Grade 11A',emoji:'👧'},{name:'Ashwin Dev',cls:'Grade 8A',emoji:'👦'},
     {name:'Nandini Roy',cls:'Grade 10B',emoji:'👧'},{name:'Sreeraj Menon',cls:'Grade 9A',emoji:'👦'},
     {name:'Hema Krishnan',cls:'Grade 11B',emoji:'👧'}]},
-  { id:'music',   name:'Music & Band Head',    icon:'🎵', candidates:[
+  { id:'music',   name:'Music & Band Head',  icon:'🎵', candidates:[
     {name:'Jesna Jacob',cls:'Grade 10C',emoji:'👧'},{name:'Akash Varma',cls:'Grade 9B',emoji:'👦'},
     {name:'Treesa Paul',cls:'Grade 11A',emoji:'👧'},{name:'Nitin Suresh',cls:'Grade 8B',emoji:'👦'},
     {name:'Gayathri Nair',cls:'Grade 10A',emoji:'👧'},{name:'Suraj Das',cls:'Grade 9A',emoji:'👦'}]},
-  { id:'welfare', name:'Student Welfare Rep',  icon:'🤝', candidates:[
+  { id:'welfare', name:'Student Welfare Rep',icon:'🤝', candidates:[
     {name:'Parvathy Raj',cls:'Grade 10B',emoji:'👧'},{name:'Adithya Nair',cls:'Grade 11A',emoji:'👦'},
     {name:'Sreelakshmi K',cls:'Grade 9C',emoji:'👧'},{name:'Thomas Mathew',cls:'Grade 8A',emoji:'👦'},
     {name:'Anjana Suresh',cls:'Grade 10C',emoji:'👧'},{name:'Jeevan Paul',cls:'Grade 9A',emoji:'👦'},
-    {name:'Vinitha Rao',cls:'Grade 11B',emoji:'👧'}]},
+    {name:'Vinitha Rao',cls:'Grade 11B',emoji:'👧'}]}
 ];
+
+const PIE_COLORS = ['#c9a84c','#3498db','#27ae60','#e74c3c','#9b59b6','#e67e22','#1abc9c','#e91e63','#00bcd4','#8bc34a'];
+let chartsVisible = false;
+const chartInstances = {};
 
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value;
@@ -273,24 +245,18 @@ function doLogin() {
   if (pwd === stored) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('results-main').style.display = 'block';
-    renderResults();
-    setInterval(renderResults, 4000);
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-  }
+    renderResults(); setInterval(renderResults, 4000);
+  } else { document.getElementById('login-error').style.display = 'block'; }
 }
 
 function computeTally() {
   const allVotes = JSON.parse(localStorage.getItem('electionVotes') || '[]');
   const tally = {};
-  POSTS.forEach(p => {
-    tally[p.id] = new Array(p.candidates.length).fill(0);
-  });
+  POSTS.forEach(p => { tally[p.id] = new Array(p.candidates.length).fill(0); });
   allVotes.forEach(ballot => {
-    Object.entries(ballot.votes).forEach(([postId, voteData]) => {
-      if (tally[postId] !== undefined && voteData.candidateIdx < tally[postId].length) {
-        tally[postId][voteData.candidateIdx]++;
-      }
+    Object.entries(ballot.votes).forEach(([postId, vd]) => {
+      if (tally[postId] !== undefined && vd.candidateIdx < tally[postId].length)
+        tally[postId][vd.candidateIdx]++;
     });
   });
   return { tally, total: allVotes.length };
@@ -299,7 +265,9 @@ function computeTally() {
 function renderResults() {
   const { tally, total } = computeTally();
   const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
+  const enrolled = JSON.parse(localStorage.getItem('enrolledAdmissions') || '[]');
   document.getElementById('hero-total').textContent = total;
+  document.getElementById('hero-pct').textContent = enrolled.length > 0 ? Math.round((total/enrolled.length)*100)+'%' : '—';
   document.getElementById('last-update').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
   const body = document.getElementById('results-body');
@@ -308,7 +276,7 @@ function renderResults() {
   POSTS.forEach(post => {
     const votes = tally[post.id];
     const maxVotes = Math.max(...votes, 1);
-    const sortedIdx = votes.map((v,i)=>i).sort((a,b) => votes[b]-votes[a]);
+    const sortedIdx = votes.map((v,i)=>i).sort((a,b)=>votes[b]-votes[a]);
     const cd = customData[post.id] || {};
 
     const rowsHTML = sortedIdx.map((ci, rank) => {
@@ -317,79 +285,156 @@ function renderResults() {
       const name = custom.name || c.name;
       const photo = custom.photo || null;
       const v = votes[ci];
-      const pct = total > 0 ? Math.round((v / total) * 100) : 0;
-      const barW = Math.round((v / maxVotes) * 100);
-      const rankClass = rank === 0 ? 'rank-1' : rank === 1 ? 'rank-2' : rank === 2 ? 'rank-3' : 'other';
-      const barClass = rankClass;
-      const rankLabel = rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : (rank+1);
+      const pct = total > 0 ? Math.round((v/total)*100) : 0;
+      const barW = Math.round((v/maxVotes)*100);
+      const rankClass = rank===0?'rank-1':rank===1?'rank-2':rank===2?'rank-3':'other';
+      const rankLabel = rank===0?'🥇':rank===1?'🥈':rank===2?'🥉':(rank+1);
       const photoEl = photo
         ? `<div class="cand-res-photo ${rank===0?'rank-1':''}"><img src="${photo}" alt=""></div>`
         : `<div class="cand-res-photo ${rank===0?'rank-1':''}">${c.emoji}</div>`;
-      return `
-        <div class="cand-result-row">
-          <div class="cand-rank ${rankClass}">${rankLabel}</div>
-          ${photoEl}
-          <div class="cand-res-info">
-            <div class="cand-res-name">${name}${rank===0 && total>0 ? '<span class="winner-crown">👑</span>' : ''}</div>
-            <div class="cand-res-bar-wrap">
-              <div class="cand-res-bar ${barClass}" style="width:${barW}%"></div>
-            </div>
-          </div>
-          <div class="cand-res-count">${v}</div>
-          <div class="cand-res-pct">${pct}%</div>
-        </div>`;
+      return `<div class="cand-result-row">
+        <div class="cand-rank ${rankClass}">${rankLabel}</div>${photoEl}
+        <div class="cand-res-info">
+          <div class="cand-res-name">${name}${rank===0&&total>0?'<span class="winner-crown">👑</span>':''}</div>
+          <div class="cand-res-bar-wrap"><div class="cand-res-bar ${rankClass}" style="width:${barW}%"></div></div>
+        </div>
+        <div class="cand-res-count">${v}</div>
+        <div class="cand-res-pct">${pct}%</div>
+      </div>`;
     }).join('');
+
+    // Print header (hidden on screen, shown in print)
+    const printHdr = `<div class="print-school-hdr" style="display:none">
+      <div><div class="print-school-name">Nusrath School</div><div class="print-election-name">Student Parliament Election 2026-27</div></div>
+      <div class="print-date">Date: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}<br>Total Voters: ${total}</div>
+    </div>`;
+    const printFooter = `<div class="print-footer" style="display:none"><span>Nusrath School Parliament Election 2026-27 — Official Results</span><span>Page ${POSTS.indexOf(post)+1} of ${POSTS.length}</span></div>`;
+
+    // Pie chart canvas
+    const chartSection = `<div class="chart-wrap" id="chart-wrap-${post.id}">
+      <div class="chart-inner"><canvas id="chart-${post.id}" height="300"></canvas></div>
+    </div>`;
 
     const card = document.createElement('div');
     card.className = 'post-result-card';
     card.innerHTML = `
+      ${printHdr}
       <div class="prc-header">
         <div class="prc-icon">${post.icon}</div>
         <div class="prc-title">${post.name}</div>
         <div class="prc-total">${total} votes</div>
       </div>
-      <div class="prc-body">
-        ${total > 0 ? rowsHTML : '<div class="no-votes">No votes recorded yet</div>'}
-      </div>`;
+      <div class="prc-body">${total>0?rowsHTML:'<div class="no-votes">No votes recorded yet</div>'}</div>
+      ${chartSection}
+      ${printFooter}`;
     body.appendChild(card);
+
+    // Draw pie chart if visible
+    if (chartsVisible && total > 0) drawChart(post, votes, customData);
   });
+
+  // Redraw charts if visible
+  if (chartsVisible) {
+    POSTS.forEach(post => {
+      const { tally: t } = computeTally();
+      drawChart(post, t[post.id], customData);
+    });
+  }
+}
+
+function drawChart(post, votes, customData) {
+  const cd = customData[post.id] || {};
+  const labels = post.candidates.map((c,ci) => {
+    const custom = (cd.candidates||[])[ci]||{};
+    return custom.name || c.name;
+  });
+  const canvasEl = document.getElementById('chart-' + post.id);
+  if (!canvasEl) return;
+  if (chartInstances[post.id]) { chartInstances[post.id].destroy(); }
+  chartInstances[post.id] = new Chart(canvasEl, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: votes,
+        backgroundColor: PIE_COLORS.slice(0, votes.length),
+        borderColor: '#0a1628',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position:'bottom', labels: { color:'rgba(253,248,238,.7)', font:{size:11}, padding:12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+              const pct = total>0?Math.round((ctx.parsed/total)*100):0;
+              return ` ${ctx.label}: ${ctx.parsed} votes (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function toggleCharts() {
+  chartsVisible = !chartsVisible;
+  const btn = document.getElementById('chart-toggle-btn');
+  btn.textContent = chartsVisible ? '📉 Hide Charts' : '📊 Show Charts';
+  btn.className = chartsVisible ? 'tool-btn active-btn' : 'tool-btn';
+  document.querySelectorAll('.chart-wrap').forEach(el => el.classList.toggle('show', chartsVisible));
+  if (chartsVisible) {
+    const { tally, total } = computeTally();
+    if (total > 0) {
+      const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
+      POSTS.forEach(post => drawChart(post, tally[post.id], customData));
+    }
+  } else {
+    Object.values(chartInstances).forEach(ch => ch.destroy());
+    Object.keys(chartInstances).forEach(k => delete chartInstances[k]);
+  }
 }
 
 function exportCSV() {
   const { tally, total } = computeTally();
   const customData = JSON.parse(localStorage.getItem('electionPostData') || '{}');
-  let csv = 'Post,Candidate,Class,Votes,Percentage\n';
+  let csv = 'Post,Rank,Candidate,Class,Votes,Percentage\n';
   POSTS.forEach(post => {
     const cd = customData[post.id] || {};
-    post.candidates.forEach((c, ci) => {
-      const custom = (cd.candidates || [])[ci] || {};
+    const votes = tally[post.id];
+    const sortedIdx = votes.map((v,i)=>i).sort((a,b)=>votes[b]-votes[a]);
+    sortedIdx.forEach((ci, rank) => {
+      const c = post.candidates[ci];
+      const custom = (cd.candidates||[])[ci]||{};
       const name = custom.name || c.name;
-      const v = tally[post.id][ci];
-      const pct = total > 0 ? ((v/total)*100).toFixed(1) : '0.0';
-      csv += `"${post.name}","${name}","${c.cls}",${v},${pct}%\n`;
+      const v = votes[ci];
+      const pct = total>0?((v/total)*100).toFixed(1):'0.0';
+      csv += `"${post.name}",${rank+1},"${name}","${c.cls}",${v},${pct}%\n`;
     });
   });
-  const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'election_results_2025.csv';
-  a.click();
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'nusrath_election_results_2026.csv'; a.click();
 }
 
-function printResults() { window.print(); }
+function printResults() {
+  // Show print headers before printing
+  document.querySelectorAll('.print-school-hdr,.print-footer').forEach(el=>el.style.display='flex');
+  window.print();
+  setTimeout(()=>document.querySelectorAll('.print-school-hdr,.print-footer').forEach(el=>el.style.display='none'),1000);
+}
 
 function resetElection() {
   if (!confirm('⚠️ WARNING: This will delete ALL vote data permanently. Are you sure?')) return;
   if (!confirm('Are you absolutely certain? This CANNOT be undone.')) return;
   localStorage.removeItem('electionVotes');
-  const s = JSON.parse(localStorage.getItem('electionSettings') || '{}');
-  s.ballotOpen = false;
-  localStorage.setItem('electionSettings', JSON.stringify(s));
-  renderResults();
-  alert('✓ All election data has been reset.');
+  const s = JSON.parse(localStorage.getItem('electionSettings')||'{}');
+  s.ballotOpen = false; localStorage.setItem('electionSettings', JSON.stringify(s));
+  renderResults(); alert('✓ All election data has been reset.');
 }
 </script>
 </body>
 </html>
-
-
