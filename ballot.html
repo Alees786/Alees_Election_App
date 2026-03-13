@@ -360,7 +360,7 @@ let drivePending = null; // { postId, candIdx }
 
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value;
-  const stored = localStorage.getItem('adminPassword') || 'admin123';
+  const stored = localStorage.getItem('adminPassword') || 'alees#321';
   if (pwd === stored) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-main').style.display = 'block';
@@ -565,3 +565,4 @@ function uploadPhoto(postId, ci) {
 </script>
 </body>
 </html>
+
